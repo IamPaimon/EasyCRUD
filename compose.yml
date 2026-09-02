@@ -1,20 +1,41 @@
-version: "3.8"
-services: 
+services:
+  db:
+    image: mariadb:latest
+    container_name: student-db
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: admin
+      MARIADB_DATABASE: student_db
+    volumes:
+      - data:/var/lib/mysql
+
   backend:
     build:
       context: ./backend
-      dockerfile: dockerfile
+    container_name: student-backend
+    restart: unless-stopped
     ports:
-      - 8080:8080
- #   depends_on:
-  #     -db
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: student_db
+      DB_USER: root
+      DB_PASSWORD: admin
 
   frontend:
-    build: 
-      context: ./frontend 
-      dockerfile: dockerfile
+    build:
+      context: ./frontend
+    container_name: student-frontend
+    restart: unless-stopped
     ports:
-      - 80:80 
+      - "80:80"
     depends_on:
-       - backend
-      
+      - backend
+
+volumes:
+  data:
